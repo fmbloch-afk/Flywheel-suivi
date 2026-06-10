@@ -1,0 +1,368 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Flywheel — Mon suivi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0c1a18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Flywheel">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-32.png">
+<style>
+:root{--bg:#0c1a18;--panel:#11201e;--card:#13231f;--ink:#e8efe9;--dim:#8aa39b;--line:#213b36;--gold:#cba34e;--teal:#3fae93;--red:#e0564f;--amber:#e0a23f;--green:#46b878;--blue:#7e9cc4}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding-bottom:74px;line-height:1.4}
+.top{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0f211e,#0c1a18);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 12px) 16px 12px}
+.top .row{display:flex;align-items:center;gap:11px}
+.top img{width:34px;height:34px;border-radius:9px}
+.top .who{font-weight:600;font-size:15px}.top .sub{font-size:11.5px;color:var(--dim)}
+.cd{margin-left:auto;text-align:right}.cd .n{font-size:18px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}.cd .l{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.wrap{max-width:680px;margin:0 auto;padding:14px 14px 0}
+.banner{background:#3a1614;border:1px solid var(--red);border-radius:11px;padding:11px 13px;margin-bottom:13px;font-size:13px;color:#ffb4af}
+.banner b{color:#fff}
+.sec{margin-bottom:18px}
+.sec h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:0 2px 9px;display:flex;align-items:center;gap:8px}
+.sec h2 .ct{margin-left:auto;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:1px 8px;font-size:11px;letter-spacing:0;color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 13px;margin-bottom:9px;cursor:pointer;border-left:3px solid var(--line)}
+.card.cp{border-left-color:var(--red)}.card.gate{border-left-color:var(--gold)}
+.card.done{opacity:.62}
+.card .h{display:flex;align-items:center;gap:8px}
+.card .id{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--gold);font-weight:600}
+.card .fl{font-size:10px;color:var(--dim)}
+.card .st{margin-left:auto;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;border:1px solid var(--line)}
+.st-done{color:var(--green);border-color:#46b87855!important}.st-prog{color:var(--teal);border-color:var(--teal)!important}.st-late{color:#ffb4af;border-color:var(--red)!important;background:#3a1614}.st-none{color:var(--dim)}
+.card .nm{font-size:14px;font-weight:500;margin:6px 0 3px}
+.card .me{font-size:11.5px;color:var(--dim)}
+.card .note{font-size:12px;color:var(--blue);margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.empty{color:#5e7670;font-size:12.5px;padding:4px 2px}
+.tabs{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;background:#0f211e;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;text-align:center;padding:11px 0 9px;color:var(--dim);font-size:11px;cursor:pointer}
+.tab .ic{font-size:19px;display:block;line-height:1}.tab.on{color:var(--gold)}
+.view{display:none}.view.on{display:block}
+.sheet{position:fixed;inset:0;z-index:40;background:#000a;display:none;align-items:flex-end}
+.sheet.open{display:flex}
+.sbox{background:var(--panel);border-top:1px solid var(--gold);border-radius:18px 18px 0 0;width:100%;max-width:680px;margin:0 auto;max-height:90vh;overflow:auto;padding:18px 16px calc(env(safe-area-inset-bottom) + 18px)}
+.sbox h3{font-size:16px;margin-bottom:3px}.sbox .sid{font-family:ui-monospace,monospace;font-size:12px;color:var(--gold)}
+.sbox .meta{font-size:12px;color:var(--dim);margin:8px 0 14px;line-height:1.6}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+.sbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:13px;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;text-align:center}
+.sbtn.sel.done{background:#143a26;border-color:var(--green);color:var(--green)}
+.sbtn.sel.prog{background:#13302c;border-color:var(--teal);color:var(--teal)}
+.sbtn.sel.late{background:#3a1614;border-color:var(--red);color:#ffb4af}
+.sbtn.sel.none{background:#1a2826;border-color:var(--dim)}
+label.fl{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);display:block;margin:10px 2px 5px}
+textarea,input[type=text],input[type=time],input[type=tel],input[type=email]{width:100%;background:#0c1a18;border:1px solid var(--line);color:var(--ink);font:inherit;font-size:14px;padding:11px;border-radius:10px}
+textarea{min-height:74px;resize:vertical}
+.hint{font-size:11.5px;color:var(--dim);line-height:1.6;margin:7px 2px}
+.btn{display:block;width:100%;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:13px;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;margin-top:9px;text-align:center}
+.btn.p{background:var(--gold);border-color:var(--gold);color:#1a160c}
+.btn.wa{background:#1f3d2e;border-color:#25d36655;color:#7be0a0}
+.btn.gh{background:#13283a;border-color:var(--blue);color:#cfe0f5}
+.btn.sm{padding:10px;font-size:13px}
+.rowb{display:flex;gap:8px}.rowb .btn{flex:1}
+.box{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:13px}
+.box h3{font-size:14px;margin-bottom:4px;color:var(--gold)}
+.rep{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#cfe8da;background:#0c1a18;border:1px solid var(--line);border-radius:10px;padding:11px;margin-top:9px;line-height:1.5;max-height:230px;overflow:auto}
+.pickwrap{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;margin-top:8px}
+.wsgrp{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin:8px 4px 4px}
+.pk{display:flex;align-items:center;gap:9px;padding:7px 6px;border-radius:8px;font-size:13px}
+.pk input{width:19px;height:19px;accent-color:var(--gold)}
+.chip{display:inline-block;background:var(--panel);border:1px solid var(--line);color:var(--dim);font-size:11.5px;padding:5px 11px;border-radius:18px;margin:0 5px 5px 0;cursor:pointer}.chip.on{background:var(--teal);border-color:var(--teal);color:#08130f;font-weight:600}
+.rec{display:flex;align-items:center;gap:10px;margin-top:9px}
+.recdot{width:11px;height:11px;border-radius:50%;background:var(--red)}
+#toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:#1a160c;border:1px solid var(--gold);color:#f3efe4;padding:10px 16px;border-radius:10px;font-size:13px;z-index:90;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90%}
+.foot{text-align:center;color:#46605a;font-size:10.5px;font-family:ui-monospace,monospace;padding:10px 0 18px}
+</style></head><body>
+<div class="top"><div class="row" id="topbar"></div></div>
+
+<div id="home" class="view on"><div class="wrap">
+  <div id="banner"></div>
+  <div id="lists"></div>
+  <div class="foot">Flywheel · suivi terrain · données locales à ton téléphone</div>
+</div></div>
+
+<div id="send" class="view"><div class="wrap">
+  <div class="box">
+    <h3>Envoyer mon point</h3>
+    <div class="hint">Compile tes mises à jour en un message. Tu choisis le canal. Ton coordinateur le reporte dans la tour de contrôle.</div>
+    <label class="fl">Aperçu du message</label>
+    <div class="rep" id="repProse"></div>
+    <div class="rowb">
+      <button class="btn wa" onclick="sendWA()">WhatsApp</button>
+      <button class="btn gh" onclick="sendShare()">Partager</button>
+    </div>
+    <div class="rowb">
+      <button class="btn sm" onclick="sendMail()">E-mail</button>
+      <button class="btn sm" onclick="copyRep()">Copier</button>
+    </div>
+  </div>
+  <div class="box">
+    <h3>Note vocale (option)</h3>
+    <div class="hint">Enregistre un point parlé et partage-le (WhatsApp, e-mail). Sur iPhone tu peux aussi dicter directement dans les notes écrites via le micro du clavier.</div>
+    <div id="recui"></div>
+  </div>
+  <div class="box" style="border-color:#2a4540">
+    <h3 style="color:var(--dim)">Lignes pour la tour de contrôle</h3>
+    <div class="hint">Le coordinateur colle ce bloc dans « Agent de saisie » de la tour. Vérifié avant application.</div>
+    <div class="rep" id="repAgent"></div>
+    <button class="btn sm" onclick="copyAgent()">Copier les lignes Agent</button>
+  </div>
+</div></div>
+
+<div id="settings" class="view"><div class="wrap">
+  <div class="box">
+    <h3>Rappel quotidien (fiable)</h3>
+    <div class="hint">Ajoute un rappel récurrent à l'agenda de ton téléphone : une notification chaque jour, même app fermée. C'est la méthode la plus sûre sur iPhone.</div>
+    <label class="fl">Heure du rappel</label>
+    <input type="time" id="remTime" value="08:00">
+    <button class="btn p" onclick="dlICS()">Ajouter le rappel à mon agenda</button>
+    <button class="btn sm" onclick="testNotif()">Tester une notification maintenant</button>
+  </div>
+  <div class="box">
+    <h3>Mon profil</h3>
+    <label class="fl">Mon nom</label><input type="text" id="setName">
+    <label class="fl">Mes tâches</label>
+    <div style="margin:6px 0"><span class="chip" onclick="pickAllWs()">Tout cocher par flux…</span></div>
+    <div class="pickwrap" id="pick"></div>
+    <button class="btn p" onclick="saveProfile()">Enregistrer</button>
+  </div>
+  <div class="box">
+    <h3>Coordinateur (destinataire)</h3>
+    <div class="hint">Où partir tes points par défaut.</div>
+    <label class="fl">WhatsApp (format international, ex. 24206…)</label><input type="tel" id="setWa">
+    <label class="fl">E-mail</label><input type="email" id="setEmail">
+    <button class="btn sm" onclick="saveCoord()">Enregistrer le coordinateur</button>
+  </div>
+  <div class="box" id="coordtools">
+    <h3>Outils coordinateur — créer un lien collaborateur</h3>
+    <div class="hint">Choisis un nom + ses tâches → obtiens un lien à lui envoyer. Il l'ouvre, l'ajoute à l'écran d'accueil, et ne voit que ses tâches.</div>
+    <label class="fl">Nom du collaborateur</label><input type="text" id="clName" placeholder="ex. Ministère — Mme X">
+    <label class="fl">Ses tâches</label>
+    <div class="pickwrap" id="clpick"></div>
+    <button class="btn p" onclick="buildLink()">Générer le lien</button>
+    <div class="rep" id="linkout" style="display:none"></div>
+    <div class="rowb" id="linkbtns" style="display:none">
+      <button class="btn wa sm" onclick="inviteWA()">Inviter par WhatsApp</button>
+      <button class="btn sm" onclick="copyLink()">Copier le lien</button>
+    </div>
+  </div>
+  <div class="box">
+    <div id="installhint" class="hint"></div>
+    <button class="btn sm" onclick="resetAll()" style="color:#ffb4af;border-color:var(--red)">Réinitialiser cette app</button>
+  </div>
+</div></div>
+
+<div class="tabs">
+  <div class="tab on" id="t-home" onclick="nav('home')"><span class="ic">◴</span>Aujourd'hui</div>
+  <div class="tab" id="t-send" onclick="nav('send')"><span class="ic">➤</span>Envoyer</div>
+  <div class="tab" id="t-settings" onclick="nav('settings')"><span class="ic">⚙</span>Réglages</div>
+</div>
+
+<div class="sheet" id="sheet" onclick="if(event.target.id==='sheet')closeSheet()"><div class="sbox" id="sbox"></div></div>
+<div id="toast"></div>
+<script>
+const DATA={"J1":"2026-10-26","AX0":"2026-06-01","AX1":"2026-11-02","WS":{"R":{"n":"Constitution · banque · fondation","c":"#cba34e"},"H":{"n":"Financement FONEA · scolarité","c":"#9d7bbf"},"A":{"n":"Autorisation · curriculum · douanes","c":"#7e9cc4"},"B":{"n":"Site · salles · énergie · connectivité","c":"#3fae93"},"C":{"n":"LMS · contenu · plateforme","c":"#4f9d8f"},"D":{"n":"Approvisionnement · équipement","c":"#c98a3f"},"E":{"n":"Recrutement étudiants","c":"#c75d7a"},"F":{"n":"Facilitateurs · formateurs","c":"#6f8f7a"},"G":{"n":"Go/no-go · contingence · lancement","c":"#d0494a"}},"T":[{"id":"P0","ws":"R","n":"Lettre d'intention / commande relais (AGS)","own":"AGS — anticipé","s":"2026-06-05","e":"2026-06-12","cp":1,"gate":0,"tbc":0},{"id":"L1","ws":"R","n":"Bail du site FONEA — sécurisation","own":"FONEA / bailleur","s":"2026-06-08","e":"2026-06-22","cp":1,"gate":1,"tbc":0},{"id":"R1","ws":"R","n":"Constitution FLYWHEEL CONGO SAS","own":"Notaire · OHADA","s":"2026-06-10","e":"2026-06-30","cp":1,"gate":0,"tbc":0},{"id":"R2","ws":"R","n":"Immatriculation (RCCM & fiscal)","own":"Guichet unique","s":"2026-06-25","e":"2026-07-10","cp":1,"gate":0,"tbc":0},{"id":"R3","ws":"R","n":"Relation bancaire + compte société","own":"BGFIBank","s":"2026-06-15","e":"2026-07-15","cp":1,"gate":0,"tbc":1},{"id":"R4","ws":"R","n":"Dépôt capital (novation LOI→SAS)","own":"BGFIBank / AGS","s":"2026-07-10","e":"2026-07-25","cp":1,"gate":0,"tbc":1},{"id":"H1","ws":"H","n":"Accord financement FONEA scolarité","own":"FONEA","s":"2026-06-10","e":"2026-07-20","cp":1,"gate":1,"tbc":0},{"id":"H2","ws":"H","n":"Dossier financements internationaux","own":"AGS · bailleurs","s":"2026-06-15","e":"2026-07-31","cp":0,"gate":0,"tbc":1},{"id":"H3","ws":"H","n":"Instruction & approbation bailleurs","own":"Bailleurs","s":"2026-07-31","e":"2026-09-30","cp":0,"gate":0,"tbc":1},{"id":"H4","ws":"H","n":"Décaissements échelonnés (post-cohorte 1)","own":"Bailleurs","s":"2026-10-01","e":"2026-11-02","cp":0,"gate":0,"tbc":0},{"id":"A1","ws":"A","n":"Lettre & dossier d'autorisation au Ministre","own":"Min. Malanda Samba","s":"2026-06-09","e":"2026-06-25","cp":0,"gate":0,"tbc":0},{"id":"A2","ws":"A","n":"Autorisation d'ouverture cohorte pilote","own":"Ministère","s":"2026-06-25","e":"2026-07-20","cp":0,"gate":1,"tbc":0},{"id":"A3","ws":"A","n":"Agrément du curriculum","own":"Ministère","s":"2026-06-25","e":"2026-07-25","cp":0,"gate":0,"tbc":0},{"id":"A4","ws":"A","n":"Conformité ZES / statut FONEA","own":"ZES / FONEA","s":"2026-06-20","e":"2026-07-15","cp":0,"gate":0,"tbc":0},{"id":"A5","ws":"A","n":"Dédouanement matériel (Dir. Douanes)","own":"Douanes","s":"2026-08-15","e":"2026-09-10","cp":0,"gate":0,"tbc":1},{"id":"B1","ws":"B","n":"Audit salles & plan adaptation hybride","own":"FONEA / AGS","s":"2026-06-22","e":"2026-07-05","cp":0,"gate":0,"tbc":0},{"id":"B2","ws":"B","n":"Aménagement salles (mobilier léger)","own":"Entreprises locales","s":"2026-07-05","e":"2026-07-28","cp":1,"gate":0,"tbc":0},{"id":"B3","ws":"B","n":"Connectivité fibre/4G + Wi-Fi campus","own":"Congo Telecom / GVA","s":"2026-07-01","e":"2026-07-25","cp":0,"gate":0,"tbc":0},{"id":"B4","ws":"B","n":"Énergie : solaire/onduleurs","own":"E2C / intégrateur","s":"2026-07-05","e":"2026-07-28","cp":0,"gate":0,"tbc":0},{"id":"B5","ws":"B","n":"Installation gros équipement","own":"Intégrateurs","s":"2026-07-20","e":"2026-08-15","cp":0,"gate":0,"tbc":0},{"id":"C1","ws":"C","n":"Spécification LMS & archi hybride","own":"Pédago / IT","s":"2026-06-15","e":"2026-07-05","cp":0,"gate":0,"tbc":0},{"id":"C2","ws":"C","n":"Déploiement LMS (cloud) & tests charge","own":"Intégrateur LMS","s":"2026-07-05","e":"2026-08-10","cp":0,"gate":0,"tbc":0},{"id":"C3","ws":"C","n":"Acquisition contenu sur étagère","own":"Éditeur","s":"2026-06-20","e":"2026-07-20","cp":0,"gate":0,"tbc":0},{"id":"C4","ws":"C","n":"Intégration contenu + parcours","own":"Pédago","s":"2026-07-20","e":"2026-09-15","cp":1,"gate":0,"tbc":0},{"id":"C5","ws":"C","n":"Recette pédagogique bout en bout (UAT)","own":"Pédago","s":"2026-09-15","e":"2026-10-05","cp":1,"gate":0,"tbc":0},{"id":"C6","ws":"C","n":"Perso. contenu cohorte 2 (post-J1)","own":"Pédago","s":"2026-10-05","e":"2026-11-02","cp":0,"gate":0,"tbc":0},{"id":"D1","ws":"D","n":"Spéc. & appel d'offres régional tablettes","own":"Achats AGS","s":"2026-06-09","e":"2026-06-30","cp":1,"gate":0,"tbc":0},{"id":"D2","ws":"D","n":"Commande & appro régional (relais LOI)","own":"Achats · fournisseurs","s":"2026-06-30","e":"2026-08-31","cp":1,"gate":0,"tbc":1},{"id":"D3","ws":"D","n":"Configuration/MDM, image, marquage","own":"Intégrateur","s":"2026-09-01","e":"2026-09-25","cp":1,"gate":0,"tbc":0},{"id":"D4","ws":"D","n":"Distribution aux étudiants","own":"Équipe campus","s":"2026-09-25","e":"2026-10-20","cp":1,"gate":0,"tbc":0},{"id":"E1","ws":"E","n":"Critères admission & campagne","own":"Comm / admissions","s":"2026-06-09","e":"2026-07-15","cp":0,"gate":0,"tbc":0},{"id":"E2","ws":"E","n":"Recrutement & présélection (~400 +LA)","own":"Admissions","s":"2026-07-15","e":"2026-09-15","cp":0,"gate":0,"tbc":0},{"id":"E3","ws":"E","n":"Tests positionnement & sélection finale","own":"Admissions","s":"2026-09-15","e":"2026-10-05","cp":1,"gate":0,"tbc":0},{"id":"E4","ws":"E","n":"Verrouillage cohorte payée + conventions","own":"SAS / finance","s":"2026-10-05","e":"2026-10-19","cp":1,"gate":1,"tbc":0},{"id":"F1","ws":"F","n":"Profils de facilitateurs","own":"RH pilote","s":"2026-07-01","e":"2026-07-20","cp":0,"gate":0,"tbc":0},{"id":"F2","ws":"F","n":"Recrutement facilitateurs","own":"RH pilote","s":"2026-07-20","e":"2026-09-15","cp":0,"gate":0,"tbc":0},{"id":"F3","ws":"F","n":"Formation modèle de facilitation","own":"Pédago","s":"2026-09-15","e":"2026-10-15","cp":1,"gate":0,"tbc":0},{"id":"G1","ws":"G","n":"Simulation J-15 (hybride + distance)","own":"Direction","s":"2026-10-09","e":"2026-10-12","cp":1,"gate":0,"tbc":0},{"id":"G2","ws":"G","n":"Réserve de contingence (tampon 2 sem.)","own":"Direction","s":"2026-10-12","e":"2026-10-25","cp":0,"gate":0,"tbc":0},{"id":"G3","ws":"G","n":"Go/no-go Ministère — GATES","own":"Ministère / Direction","s":"2026-10-15","e":"2026-10-15","cp":1,"gate":1,"tbc":0},{"id":"G4","ws":"G","n":"Marge claire avant rentrée","own":"Direction","s":"2026-10-19","e":"2026-10-25","cp":0,"gate":0,"tbc":0}],"PRED":{"P0":[],"L1":[],"R1":[],"R2":["R1"],"R3":["R2"],"R4":["R3","P0"],"H1":[],"H2":[],"H3":["H2"],"H4":["H3"],"A1":[],"A2":["A1"],"A3":["A1"],"A4":[],"A5":["D2","A4"],"B1":["L1"],"B2":["B1"],"B3":["B1"],"B4":["B1"],"B5":["B2","B4"],"C1":[],"C2":["C1"],"C3":[],"C4":["C2","C3"],"C5":["C4","D3"],"C6":["C5"],"D1":[],"D2":["D1","R4"],"D3":["D2"],"D4":["D3","A5","E3"],"E1":[],"E2":["E1"],"E3":["E2"],"E4":["E3","R1"],"F1":[],"F2":["F1"],"F3":["F2","C5"],"G1":["F3","C5","D4","B2"],"G2":["G1"],"G3":["A2","L1","H1","E4","G1"],"G4":["G3"]},"owners":["AGS · bailleurs","AGS — anticipé","Achats AGS","Achats · fournisseurs","Admissions","BGFIBank","BGFIBank / AGS","Bailleurs","Comm / admissions","Congo Telecom / GVA","Direction","Douanes","E2C / intégrateur","Entreprises locales","FONEA","FONEA / AGS","FONEA / bailleur","Guichet unique","Intégrateur","Intégrateur LMS","Intégrateurs","Min. Malanda Samba","Ministère","Ministère / Direction","Notaire · OHADA","Pédago","Pédago / IT","RH pilote","SAS / finance","ZES / FONEA","Éditeur","Équipe campus"]};
+const T=DATA.T, WS=DATA.WS, J1=DATA.J1, byId={};T.forEach(t=>byId[t.id]=t);
+const KEY='fw_suivi_v1';
+let S={name:'',coord:{wa:'',email:''},tasks:[],prog:{},lastSent:null};
+let TODAY=new Date();
+let curId=null, mediaRec=null, recChunks=[], recBlob=null;
+
+function qs(k){return new URLSearchParams(location.search).get(k);}
+function load(){try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.opacity=1;clearTimeout(window._t);window._t=setTimeout(()=>t.style.opacity=0,2400);}
+function iso(d){return d.toISOString().slice(0,10);}
+function pdate(s){return new Date(s+'T00:00:00');}
+function ddays(a,b){return Math.round((pdate(iso(b))-pdate(iso(a)))/864e5);}
+function fmt(s){return pdate(s).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});}
+function fmtFull(s){return pdate(s).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});}
+
+function applyPreset(){
+ const u=qs('u'),t=qs('t'),c=qs('c'),e=qs('e'),asof=qs('asof');
+ if(asof&&/^\d{4}-\d{2}-\d{2}$/.test(asof))TODAY=pdate(asof);
+ let changed=false;
+ if(u){S.name=u;changed=true;}
+ if(t){S.tasks=t.split(',').map(x=>x.trim().toUpperCase()).filter(x=>byId[x]);changed=true;}
+ if(c){S.coord.wa=c.replace(/[^0-9]/g,'');changed=true;}
+ if(e){S.coord.email=e;changed=true;}
+ if(changed){save();}
+ if(u||t||c||e){history.replaceState(null,'',location.pathname);} 
+}
+function myTasks(){return S.tasks.map(id=>byId[id]).filter(Boolean);}
+function stOf(id){return (S.prog[id]&&S.prog[id].st)||null;}
+function cat(t){const st=stOf(t.id);if(st==='done')return'done';
+ if(st==='late')return'late';
+ if(ddays(TODAY,pdate(t.e))<0)return'late';
+ if(st==='prog')return'week';
+ const dS=ddays(TODAY,pdate(t.s));
+ if(dS<=7)return'week';
+ if(dS<=21)return'soon';
+ return'later';}
+
+function renderTop(){
+ const dl=ddays(TODAY,pdate(J1));
+ document.getElementById('topbar').innerHTML=
+  '<img src="icon-192.png" alt=""><div><div class="who">'+(S.name||'Mon suivi')+'</div><div class="sub">'+fmtFull(iso(TODAY))+'</div></div>'+
+  '<div class="cd"><div class="n">'+(dl>=0?'J-'+dl:'J+'+(-dl))+'</div><div class="l">rentrée 26 oct</div></div>';
+}
+function card(t){const c=cat(t),st=stOf(t.id);
+ const stl={done:['st-done','✓ Fait'],prog:['st-prog','▶ En cours'],late:['st-late','⚠ En retard'],none:['st-none','À faire']};
+ const k=st==='done'?'done':st==='prog'?'prog':(st==='late'||c==='late')?'late':'none';
+ const note=S.prog[t.id]&&S.prog[t.id].note?'<div class="note">📝 '+S.prog[t.id].note.replace(/</g,'&lt;')+'</div>':'';
+ const fl=(t.cp?'● critique ':'')+(t.gate?'◆ porte ':'')+'· '+WS[t.ws].n;
+ return '<div class="card '+(t.cp?'cp ':'')+(t.gate?'gate ':'')+(k==='done'?'done':'')+'" onclick="openSheet(\''+t.id+'\')">'+
+  '<div class="h"><span class="id">'+t.id+'</span><span class="fl">'+fl+'</span><span class="st '+stl[k][0]+'">'+stl[k][1]+'</span></div>'+
+  '<div class="nm">'+t.n+'</div>'+
+  '<div class="me">Fenêtre '+fmt(t.s)+' → '+fmt(t.e)+'</div>'+note+'</div>';
+}
+function renderHome(){
+ renderTop();
+ const ts=myTasks();
+ if(!ts.length){document.getElementById('banner').innerHTML='';document.getElementById('lists').innerHTML='<div class="box"><h3>Bienvenue</h3><div class="hint">Aucune tâche configurée. Ouvre le lien envoyé par ton coordinateur, ou va dans Réglages → Mon profil pour choisir tes tâches.</div></div>';return;}
+ const g={late:[],week:[],soon:[],later:[],done:[]};
+ ts.forEach(t=>g[cat(t)].push(t));
+ const ord=t=>pdate(t.e)-0;[...Object.values(g)].forEach(a=>a.sort((x,y)=>ord(x)-ord(y)));
+ const bn=document.getElementById('banner');
+ if(g.late.length){bn.innerHTML='<b>⚠ '+g.late.length+' tâche'+(g.late.length>1?'s':'')+' en retard.</b> Mets à jour puis envoie ton point — la rentrée est le 26 oct.';}
+ else if(g.week.length){bn.innerHTML='<b>'+g.week.length+' tâche'+(g.week.length>1?'s':'')+' cette semaine.</b> Fais ton point quand une avance.';}
+ else bn.innerHTML='';
+ let h='';
+ const sec=(title,arr,extra)=>{if(!arr.length)return'';return '<div class="sec"><h2>'+title+'<span class="ct">'+arr.length+'</span></h2>'+arr.map(card).join('')+'</div>';};
+ h+=sec('⚠ En retard',g.late);
+ h+=sec('Cette semaine',g.week);
+ h+=sec('Bientôt',g.soon);
+ if(g.later.length)h+=sec('Plus tard',g.later);
+ h+=sec('Terminé',g.done);
+ document.getElementById('lists').innerHTML=h;
+}
+function openSheet(id){curId=id;const t=byId[id],st=stOf(id),note=(S.prog[id]&&S.prog[id].note)||'';
+ const sel=x=>st===x?'sel '+x:'';
+ const lateSel=(st==='late'||(st==null&&ddays(TODAY,pdate(t.e))<0))?'sel late':'';
+ document.getElementById('sbox').innerHTML=
+  '<div class="sid">'+t.id+(t.gate?' ◆ porte':'')+(t.cp?' · ● critique':'')+'</div><h3>'+t.n+'</h3>'+
+  '<div class="meta">Responsable indicatif : '+t.own+'<br>Fenêtre planifiée : '+fmt(t.s)+' → '+fmt(t.e)+(t.tbc?' · à confirmer':'')+'</div>'+
+  '<label class="fl">Où en es-tu ?</label>'+
+  '<div class="sgrid">'+
+   '<div class="sbtn '+sel('done')+' done" onclick="setSt(\'done\')">✓ Fait</div>'+
+   '<div class="sbtn '+sel('prog')+' prog" onclick="setSt(\'prog\')">▶ En cours</div>'+
+   '<div class="sbtn '+(lateSel||'')+' late" onclick="setSt(\'late\')">⚠ Bloqué / retard</div>'+
+   '<div class="sbtn '+sel(null)+' none" onclick="setSt(null)">↺ À faire</div>'+
+  '</div>'+
+  '<label class="fl">Note écrite (ce qui a avancé, blocage, besoin)</label>'+
+  '<textarea id="snote" placeholder="ex. Salle B prête, attente devis énergie de E2C…">'+note.replace(/</g,'&lt;')+'</textarea>'+
+  '<div class="hint">iPhone : touche le micro du clavier pour dicter.</div>'+
+  '<button class="btn p" onclick="saveSheet()">Enregistrer</button>'+
+  '<button class="btn sm" onclick="closeSheet()">Fermer</button>';
+ document.getElementById('sheet').classList.add('open');
+}
+function closeSheet(){document.getElementById('sheet').classList.remove('open');}
+function setSt(x){if(!S.prog[curId])S.prog[curId]={};S.prog[curId].st=x;S.prog[curId].at=new Date().toISOString();
+ const t=byId[curId];['done','prog','late','none'].forEach(()=>{});openSheet(curId);}
+function saveSheet(){const n=document.getElementById('snote').value.trim();if(!S.prog[curId])S.prog[curId]={};S.prog[curId].note=n;S.prog[curId].at=new Date().toISOString();save();closeSheet();renderHome();renderSend();toast('Enregistré');}
+
+function statusWord(st,t){return st==='done'?'Fait':st==='prog'?'En cours':st==='late'?'Bloqué/retard':'À faire';}
+function compile(){
+ const ts=myTasks();const done=[],prog=[],late=[],todo=[];
+ ts.forEach(t=>{const st=stOf(t.id),c=cat(t),note=(S.prog[t.id]&&S.prog[t.id].note)||'';
+  const line=t.id+' '+t.n+(note?' — '+note:'');
+  if(st==='done')done.push(line);
+  else if(st==='prog')prog.push(line);
+  else if(st==='late'||c==='late')late.push(line);
+  else if(c==='week')todo.push(t.id+' '+t.n);});
+ let p='FLYWHEEL — Point de '+(S.name||'(nom)')+'\n'+fmtFull(iso(TODAY))+'\n';
+ if(done.length)p+='\n✓ FAIT\n- '+done.join('\n- ');
+ if(prog.length)p+='\n\n▶ EN COURS\n- '+prog.join('\n- ');
+ if(late.length)p+='\n\n⚠ EN RETARD / BLOCAGE\n- '+late.join('\n- ');
+ if(todo.length)p+='\n\n◷ À FAIRE CETTE SEMAINE\n- '+todo.join('\n- ');
+ if(!done.length&&!prog.length&&!late.length)p+='\nAucune mise à jour saisie.';
+ // agent lines: only safe status transitions
+ const ag=[];ts.forEach(t=>{const st=stOf(t.id);if(st==='done')ag.push(t.id+' fait');else if(st==='prog')ag.push(t.id+' cours');});
+ return {prose:p,agent:ag.join('\n')};
+}
+function renderSend(){const c=compile();document.getElementById('repProse').textContent=c.prose;document.getElementById('repAgent').textContent=c.agent||'(rien à reporter — marque des tâches Fait / En cours)';renderRec();}
+function fullMsg(){const c=compile();return c.prose+(c.agent?'\n\n— — —\nPour la tour (Agent de saisie) :\n'+c.agent:'');}
+function markSent(){S.lastSent=new Date().toISOString();save();}
+function sendWA(){const num=S.coord.wa||'';const url='https://wa.me/'+num+'?text='+encodeURIComponent(fullMsg());markSent();window.open(url,'_blank');}
+function sendMail(){const to=S.coord.email||'';const url='mailto:'+to+'?subject='+encodeURIComponent('Flywheel — point '+(S.name||''))+'&body='+encodeURIComponent(fullMsg());markSent();window.location.href=url;}
+function sendShare(){if(navigator.share){markSent();navigator.share({title:'Flywheel — mon point',text:fullMsg()}).catch(()=>{});}else{copyRep();}}
+function copyRep(){nav2clip(fullMsg(),'Message copié');markSent();}
+function copyAgent(){const c=compile();nav2clip(c.agent||'','Lignes Agent copiées');}
+function nav2clip(txt,msg){if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>toast(msg),()=>toast('Copie indisponible'));}else toast('Copie indisponible');}
+
+// voice note
+function renderRec(){const ui=document.getElementById('recui');
+ if(!(navigator.mediaDevices&&window.MediaRecorder)){ui.innerHTML='<div class="hint">Enregistrement audio non disponible sur ce navigateur. Utilise la dictée du clavier dans les notes écrites.</div>';return;}
+ if(mediaRec&&mediaRec.state==='recording'){ui.innerHTML='<div class="rec"><span class="recdot"></span> Enregistrement… <button class="btn sm" style="margin:0 0 0 auto;width:auto;padding:8px 14px" onclick="recStop()">Arrêter</button></div>';return;}
+ let h='<button class="btn sm" onclick="recStart()">● Enregistrer une note vocale</button>';
+ if(recBlob){h+='<audio controls src="'+URL.createObjectURL(recBlob)+'" style="width:100%;margin-top:9px"></audio><button class="btn wa sm" onclick="recShare()">Partager la note vocale</button>';}
+ ui.innerHTML=h;
+}
+async function recStart(){try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});recChunks=[];mediaRec=new MediaRecorder(stream);mediaRec.ondataavailable=e=>recChunks.push(e.data);mediaRec.onstop=()=>{recBlob=new Blob(recChunks,{type:mediaRec.mimeType||'audio/mp4'});stream.getTracks().forEach(t=>t.stop());renderRec();};mediaRec.start();renderRec();}catch(e){toast('Micro refusé');}}
+function recStop(){if(mediaRec&&mediaRec.state==='recording')mediaRec.stop();}
+async function recShare(){if(!recBlob)return;const ext=(recBlob.type.indexOf('mp4')>=0)?'m4a':'webm';const file=new File([recBlob],'point_'+(S.name||'flywheel')+'.'+ext,{type:recBlob.type});
+ if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Note vocale Flywheel'});}catch(e){}}
+ else{const a=document.createElement('a');a.href=URL.createObjectURL(recBlob);a.download=file.name;a.click();toast('Note téléchargée — joins-la dans WhatsApp');}
+}
+
+// settings: profile picker
+function buildPicker(elId,selected){const el=document.getElementById(elId);let h='';
+ Object.keys(WS).forEach(k=>{const rows=T.filter(t=>t.ws===k);h+='<div class="wsgrp">'+k+' — '+WS[k].n+'</div>';
+  rows.forEach(t=>{const ch=selected.indexOf(t.id)>=0?'checked':'';h+='<label class="pk"><input type="checkbox" value="'+t.id+'" '+ch+'> <span><b style="color:'+WS[t.ws].c+'">'+t.id+'</b> '+t.n+(t.cp?' ●':'')+(t.gate?' ◆':'')+'</span></label>';});});
+ el.innerHTML=h;}
+function pickedIds(elId){return [...document.getElementById(elId).querySelectorAll('input:checked')].map(i=>i.value);}
+function pickAllWs(){const k=prompt('Cocher tout un flux — entre la lettre du flux:\n'+Object.keys(WS).map(x=>x+'='+WS[x].n).join('\n'));if(!k)return;const K=k.trim().toUpperCase();if(!WS[K]){toast('Flux inconnu');return;}document.getElementById('pick').querySelectorAll('input').forEach(i=>{if(byId[i.value].ws===K)i.checked=true;});}
+function renderSettings(){
+ document.getElementById('setName').value=S.name||'';
+ document.getElementById('setWa').value=S.coord.wa||'';
+ document.getElementById('setEmail').value=S.coord.email||'';
+ buildPicker('pick',S.tasks);
+ buildPicker('clpick',[]);
+ // install hint
+ const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+ const standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+ const ih=document.getElementById('installhint');
+ if(standalone)ih.textContent='App installée. ✓';
+ else if(ios)ih.innerHTML='Pour installer : touche <b>Partager</b> (carré avec flèche) puis <b>Sur l\'écran d\'accueil</b>.';
+ else ih.innerHTML='Pour installer : menu du navigateur → <b>Installer l\'application</b> / <b>Ajouter à l\'écran d\'accueil</b>.';
+}
+function saveProfile(){S.name=document.getElementById('setName').value.trim();S.tasks=pickedIds('pick');save();renderHome();renderSend();toast('Profil enregistré');}
+function saveCoord(){S.coord.wa=document.getElementById('setWa').value.replace(/[^0-9]/g,'');S.coord.email=document.getElementById('setEmail').value.trim();save();toast('Coordinateur enregistré');}
+function buildLink(){const name=document.getElementById('clName').value.trim();const ids=pickedIds('clpick');if(!ids.length){toast('Choisis au moins une tâche');return;}
+ const base=location.origin+location.pathname;const p=new URLSearchParams();if(name)p.set('u',name);p.set('t',ids.join(','));if(S.coord.wa)p.set('c',S.coord.wa);if(S.coord.email)p.set('e',S.coord.email);
+ const link=base+'?'+p.toString();window._lastlink=link;
+ const o=document.getElementById('linkout');o.style.display='block';o.textContent=link;document.getElementById('linkbtns').style.display='flex';toast('Lien généré');
+}
+function inviteWA(){const link=window._lastlink;if(!link)return;const name=document.getElementById('clName').value.trim();const msg='Bonjour '+(name||'')+',\nVoici ton appli de suivi Flywheel (tâches du pilote FONEA). Ouvre ce lien sur ton téléphone, puis ajoute-le à l\'écran d\'accueil :\n'+link+'\nElle te rappelle tes tâches et te permet d\'envoyer ton point en un geste.';window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');}
+function copyLink(){if(window._lastlink)nav2clip(window._lastlink,'Lien copié');}
+
+// reminders
+function pad(n){return (n<10?'0':'')+n;}
+function dlICS(){const tm=document.getElementById('remTime').value||'08:00';const[H,M]=tm.split(':').map(Number);
+ const d=new Date();d.setHours(H,M,0,0);if(d<new Date())d.setDate(d.getDate()+1);
+ const dt=d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(H)+pad(M)+'00';
+ const uid='flywheel-'+Date.now()+'@suivi';
+ const url=location.origin+location.pathname;
+ const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Flywheel//Suivi//FR','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT','UID:'+uid,'DTSTAMP:'+dt,'DTSTART:'+dt,'DURATION:PT15M','RRULE:FREQ=DAILY','SUMMARY:Flywheel — fais ton point du jour','DESCRIPTION:Ouvre ton suivi Flywheel\\, mets à jour tes tâches et envoie ton point.\\n'+url,'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Flywheel — point du jour','TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+ const blob=new Blob([ics],{type:'text/calendar'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='flywheel-rappel-quotidien.ics';document.body.appendChild(a);a.click();a.remove();
+ toast('Ouvre le fichier pour l\'ajouter à ton agenda');
+}
+async function testNotif(){if(!('Notification'in window)){toast('Notifications non supportées ici');return;}
+ let p=Notification.permission;if(p!=='granted')p=await Notification.requestPermission();
+ if(p==='granted'){try{const reg=await navigator.serviceWorker.getRegistration();const body='Test réussi — tu recevras tes alertes ici.';if(reg&&reg.showNotification)reg.showNotification('Flywheel',{body,icon:'icon-192.png'});else new Notification('Flywheel',{body,icon:'icon-192.png'});}catch(e){toast('Notif bloquée');}}
+ else toast('Notifications refusées');
+}
+async function autoNotifyIfLate(){if(!('Notification'in window)||Notification.permission!=='granted')return;const late=myTasks().filter(t=>cat(t)==='late').length;if(!late)return;try{const reg=await navigator.serviceWorker.getRegistration();const body=late+' tâche'+(late>1?'s':'')+' en retard — fais ton point.';if(reg&&reg.showNotification)reg.showNotification('Flywheel',{body,icon:'icon-192.png',tag:'fw-late'});}catch(e){}}
+
+function resetAll(){if(confirm('Effacer tes données locales (profil, avancement) ?')){localStorage.removeItem(KEY);location.reload();}}
+
+function nav(v){['home','send','settings'].forEach(x=>{document.getElementById(x).classList.toggle('on',x===v);document.getElementById('t-'+x).classList.toggle('on',x===v);});window.scrollTo(0,0);if(v==='send')renderSend();if(v==='settings')renderSettings();if(v==='home')renderHome();}
+
+// init
+load();applyPreset();renderHome();
+if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){TODAY=qs('asof')?TODAY:new Date();renderHome();}});
+setTimeout(autoNotifyIfLate,1500);
+</script></body></html>
